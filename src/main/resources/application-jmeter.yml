@@ -1,0 +1,27 @@
+server:
+  port: 8081
+
+# JMeter 压测专用配置。
+# 启动方式：mvn spring-boot:run -Dspring-boot.run.profiles=jmeter
+# 说明：这里关闭 token-required，是为了单独压测 Redis Lua + MQ 核心抢券链路；
+#      完整防刷链路请使用 jmeter/02_full_flow_token_required.jmx，并保持 token-required=true。
+restaurant:
+  coupon:
+    seckill:
+      token-required: false
+      user-limit-times: 100000
+      user-limit-window-seconds: 10
+      ip-limit-times: 1000000
+      ip-limit-window-seconds: 10
+      token-create-limit-times: 100000
+      token-create-limit-window-seconds: 60
+      captcha-limit-times: 100000
+      captcha-limit-window-seconds: 60
+
+spring:
+  rabbitmq:
+    listener:
+      simple:
+        concurrency: 8
+        max-concurrency: 16
+        prefetch: 50

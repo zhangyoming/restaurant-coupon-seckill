@@ -1,0 +1,80 @@
+### 变量
+@host = http://127.0.0.1:8081
+@storeId = 1
+@activityId = 1001
+@userId = 20001
+@captchaId = 替换为获取验证码返回的captchaId
+@captchaCode = 替换为算术验证码答案
+@token = 替换为创建令牌返回的token
+
+### 1. 创建门店
+POST {{host}}/admin/store/create
+Content-Type: application/json
+
+{
+  "name": "春熙路火锅店",
+  "address": "成都市锦江区春熙路 88 号",
+  "phone": "028-88888888",
+  "status": 0
+}
+
+### 2. 创建优惠券活动
+POST {{host}}/admin/coupon/activity/create
+Content-Type: application/json
+
+{
+  "storeId": {{storeId}},
+  "title": "春熙路火锅店开业抢券",
+  "couponName": "满 100 减 30 优惠券",
+  "couponAmount": 30.00,
+  "thresholdAmount": 100.00,
+  "totalStock": 1000,
+  "perUserLimit": 1,
+  "startTime": "2026-07-01T12:00:00",
+  "endTime": "2036-07-01T13:00:00"
+}
+
+### 3. 发布活动并自动预热 Redis
+PUT {{host}}/admin/coupon/activity/publish?id={{activityId}}
+
+### 4. 手动预热活动库存
+POST {{host}}/admin/coupon/activity/preheat?id={{activityId}}
+
+### 5. 查询 Redis 库存
+GET {{host}}/admin/coupon/activity/redis-stock?id={{activityId}}
+
+### 6. 获取验证码
+GET {{host}}/app/coupon/seckill/captcha?userId={{userId}}&activityId={{activityId}}
+
+### 7. 创建秒杀令牌
+POST {{host}}/app/coupon/seckill/token
+Content-Type: application/json
+
+{
+  "userId": {{userId}},
+  "activityId": {{activityId}},
+  "captchaId": "{{captchaId}}",
+  "captchaCode": "{{captchaCode}}"
+}
+
+### 8. 携带 token 抢券
+POST {{host}}/app/coupon/seckill
+Content-Type: application/json
+
+{
+  "userId": {{userId}},
+  "activityId": {{activityId}},
+  "token": "{{token}}"
+}
+
+### 9. 查询抢券结果
+GET {{host}}/app/coupon/seckill/result?userId={{userId}}&activityId={{activityId}}
+
+### 10. 查询我的优惠券
+GET {{host}}/app/coupon/my/page?userId={{userId}}&pageNo=1&pageSize=10
+
+### 11. 管理端查询领取记录
+GET {{host}}/admin/coupon/record/page?activityId={{activityId}}&pageNo=1&pageSize=10
+
+### 12. 活动分页
+GET {{host}}/admin/coupon/activity/page?pageNo=1&pageSize=10

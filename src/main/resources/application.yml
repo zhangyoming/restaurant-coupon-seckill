@@ -1,0 +1,76 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: restaurant-coupon-seckill
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/restaurant_coupon_seckill?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: 173413
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+      timeout: 5s
+      password: 173413
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        acknowledge-mode: auto
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 1000ms
+          multiplier: 2
+          max-interval: 5000ms
+
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.zym.restaurant.coupon.dal.dataobject
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+knife4j:
+  enable: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+restaurant:
+  coupon:
+    seckill:
+      # 验证码有效期：用户先拿验证码，再换取秒杀令牌
+      captcha-expire-seconds: 120
+      # 秒杀令牌有效期：令牌短期有效且一次性使用
+      token-expire-seconds: 60
+      # 用户抢券限流：同一用户 10 秒最多 5 次
+      user-limit-times: 5
+      user-limit-window-seconds: 10
+      # IP 抢券限流：同一 IP 10 秒最多 60 次
+      ip-limit-times: 60
+      ip-limit-window-seconds: 10
+      # 获取秒杀令牌限流：同一用户 60 秒最多 3 次
+      token-create-limit-times: 3
+      token-create-limit-window-seconds: 60
+      # 获取验证码限流：同一用户 60 秒最多 10 次
+      captcha-limit-times: 10
+      captcha-limit-window-seconds: 60
+      # 本地压测可临时改成 false；演示和简历项目建议保持 true
+      token-required: true
